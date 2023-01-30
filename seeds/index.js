@@ -4,6 +4,7 @@ const seedTags = require('./tag-seeds');
 const seedProductTags = require('./product-tag-seeds');
 
 const sequelize = require('../config/connection');
+// import models to sync with db
 
 const seedAll = async () => {
   await sequelize.sync({ force: true });
