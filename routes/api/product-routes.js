@@ -10,7 +10,14 @@ router.get('/', async (req, res) => {
 
   try {
     const productData = await Product.findAll({
-      include: [{ model: Category }, { model: Tag }],
+      include: [
+        { model: Category },
+        {
+          model: Tag,
+          through: {
+            attributes: [],
+          }
+        }],
     });
     res.status(200).json(productData);
   } catch (err) {
@@ -58,6 +65,8 @@ router.post('/', (req, res) => {
             tag_id,
           };
         });
+
+        // returns a list of tags assigned to the product id 
         return ProductTag.bulkCreate(productTagIdArr);
       }
       // if no product tags, just respond
@@ -87,17 +96,21 @@ router.put('/:id', (req, res) => {
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
       // create filtered list of new tag_ids
       const newProductTags = req.body.tagIds
-        .filter((tag_id) => !productTagIds.includes(tag_id))
-        .map((tag_id) => {
+        .filter((tag_id) => !productTagIds.includes(tag_id)) //find where updated tags do not equal current tags
+        .map((tag_id) => { // with list of new tags, return new ProductTag entry
+          console.log(tag_id)
           return {
             product_id: req.params.id,
             tag_id,
           };
         });
+
       // figure out which ones to remove
       const productTagsToRemove = productTags
-        .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
-        .map(({ id }) => id);
+        .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id)) // grab existing product tags that aren't matched in the user input
+        .map(({ id }) => id); //grab ids
+        console.log("product tag ids to delete: ")
+        console.log(productTagsToRemove)
 
       // run both actions
       return Promise.all([
@@ -112,12 +125,12 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
   try {
-    const productData = Product.destroy({
+    const productData = await Product.destroy({
       where: {
-        id: req.params.id, 
+        id: req.params.id,
       }
     })
     if (!productData) {
