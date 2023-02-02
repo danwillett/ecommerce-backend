@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
 
   try {
     // update product data
-    await Product.update(req.body, {
+    const productData = await Product.update(req.body, {
       where: {
         id: req.params.id,
       },
@@ -112,16 +112,13 @@ router.put('/:id', async (req, res) => {
       .filter(({ tag_id }) => !req.body.tag_id.includes(tag_id)) // grab existing product tags that aren't matched in the user input
       .map(({ id }) => id); //grab ids
 
-    console.log("product tag ids to delete: ")
-    console.log(productTagsToRemove)
-
     // run both actions
     const updatedProductTags = await Promise.all([
       ProductTag.destroy({ where: { id: productTagsToRemove } }),
       ProductTag.bulkCreate(newProductTags),
     ]);
 
-    res.status(200).json(updatedProductTags)
+    res.status(200).json({productData, updatedProductTags})
   } catch (err) {
   console.log(err);
   res.status(400).json(err);
