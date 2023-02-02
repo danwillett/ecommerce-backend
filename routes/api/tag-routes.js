@@ -51,7 +51,6 @@ router.post('/', async (req, res) => {
     if (req.body.productIds.length) {
       // add product ids to the ProductTag table
       const productTagIdArr = req.body.productIds.map((product_id) => {
-        console.log(product_id)
         return {
           tag_id: tagData.id,
           product_id,
