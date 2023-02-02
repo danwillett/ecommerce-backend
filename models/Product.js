@@ -40,8 +40,8 @@ Product.init(
         model: 'category',
         key: 'id',
       },
+      onDelete: 'CASCADE',
     }
-
   },
   {
     sequelize,
